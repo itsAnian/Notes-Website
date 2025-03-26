@@ -1,0 +1,25 @@
+{
+  "name": "my-nodejs-project",
+  "version": "1.0.0",
+  "description": "A sample Node.js project",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Building...' && mkdir -p dist && echo 'Hello, world!' > dist/index.html",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itsAnian/Notes-Website.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/itsAnian/Notes-Website/issues"
+  },
+  "homepage": "https://github.com/itsAnian/Notes-Website#readme",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.2"
+  }
+}
