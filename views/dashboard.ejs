@@ -16,16 +16,14 @@
             <thead>
                 <tr>
                     <th>Title</th>
-                    <th>Important</th>
                     <th>Created At</th>
                     <th>Tags</th>
                 </tr>
             </thead>
             <tbody>
                 <% notes.forEach(note => { %>
-                <tr>
-                    <td><%= note.title %></td>
-                    <td><%= note.important %></td>
+                    <tr>
+                    <td style="color: <%= note.important ? 'red' : 'white' %>;"><%= note.title %></td>
                     <td><%= note.created_at %></td>
                     <td><%= note.tags %></td>
                 </tr>
