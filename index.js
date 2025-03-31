@@ -54,13 +54,48 @@ app.get('/dashboard', (req, res) => {
     if (!req.session.user){
         res.redirect('/login');
     }
-    db.all('SELECT * FROM notes WHERE notes.user_id IS (SELECT users.id FROM users WHERE users.username IS ?)', [req.session.user.username], (err, rows) => {
+    db.all('SELECT * FROM notes WHERE notes.user_id IS ?', [req.session.user.id], (err, rows) => {
         if (err) {
             return res.status(500).send('Database error');
         }
         console.log('rendered');
         res.render('dashboard', { notes: rows });
     });
+});
+
+app.get('/note', (req, res) => {
+   res.render('note');
+});
+
+app.post('/savenote', (req, res) => {
+    if (!req.session.user){
+        res.redirect('/login');
+    }
+
+    const { title, content, tags, important } = req.body;
+    if(important == 'on'){
+        boolImportant = true;
+    }else{
+        boolImportant = false;
+    }
+
+    db.run('INSERT INTO notes (user_id, title, content, important) VALUES (?, ?, ?, ?)',
+        [req.session.user.id, title, content, boolImportant],
+        function (err) {
+            if (err) {
+                return console.error(err.message);
+            }
+
+            const note_id = this.lastID;
+
+            if (tags) {
+                const tagList = tags.split(',').map(tag => tag.trim()).slice(0, 5);
+                tagList.forEach(tag => {
+                    db.run(`INSERT INTO tags (note_id, tag) VALUES (?, ?)`, [note_id, tag]);
+                });
+            }
+        });
+    res.redirect('/dashboard');
 });
 
 const PORT = 3000;
