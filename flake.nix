@@ -25,6 +25,7 @@
                 echo "npm version: $(npm --version)"
                 npm install express
                 npm install sqlite3
+                npm install express-session
                 '';
                 };
 
@@ -35,6 +36,7 @@
                     buildPhase = ''
                         npm install express
                         npm install sqlite3
+                        npm install express-session
                         '';
                     installPhase = ''
                         npm start

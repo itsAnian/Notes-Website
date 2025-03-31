@@ -3,8 +3,16 @@ const app = express();
 const path = require('path');
 const db = require('./db/database.js');
 const bodyParser = require('body-parser');
+const session = require('express-session');
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(session({
+  secret: 'secret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }})
+);
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
@@ -17,6 +25,7 @@ app.post('/login', (req, res) => {
     db.get('SELECT * FROM users WHERE username = ? AND password = ?', [login_username, login_password], (err, user) => {
         if (err) return res.send('Error while login');
         if (!user) return res.send('Invalid credentials');
+        req.session.user = user;
         res.redirect('/dashboard');
     });
 });
@@ -40,6 +49,15 @@ app.post('/register', (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
+    if (!req.session.user){
+        res.redirect('/login');
+    }
+    db.all('SELECT * FROM notes WHERE notes.user_id IS (SELECT users.id FROM users WHERE users.username IS ?)', [req.session.user.username], (err, rows) => {
+        if (err) {
+            return res.status(500).send('Database error');
+        }
+        res.render('users', { users: rows });
+    });
     res.render('dashboard');
 });
 
