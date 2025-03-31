@@ -20,6 +20,12 @@ app.get('/login', (req, res) => {
     res.render('login');
 });
 
+app.get('/', (req, res) => {
+    if (!req.session.user){
+        res.redirect('/login');
+    }
+});
+
 app.post('/login', (req, res) => {
     const { login_username, login_password } = req.body;
     db.get('SELECT * FROM users WHERE username = ? AND password = ?', [login_username, login_password], (err, user) => {
@@ -54,16 +60,30 @@ app.get('/dashboard', (req, res) => {
     if (!req.session.user){
         res.redirect('/login');
     }
-    db.all('SELECT * FROM notes WHERE notes.user_id IS ?', [req.session.user.id], (err, rows) => {
+    db.all(`SELECT
+        notes.title,
+        notes.content,
+        notes.important,
+        notes.created_at,
+        GROUP_CONCAT(tags.tag, ', ') AS tags
+        FROM notes
+        FULL JOIN tags ON tags.note_id = notes.id
+        WHERE notes.user_id = ?
+        GROUP BY notes.id`, [req.session.user.id], (err, rows) => {
         if (err) {
             return res.status(500).send('Database error');
         }
-        console.log('rendered');
+        rows.forEach(row =>{
+            console.log(row);
+        });
         res.render('dashboard', { notes: rows });
     });
 });
 
 app.get('/note', (req, res) => {
+    if (!req.session.user){
+        res.redirect('/login');
+    }
    res.render('note');
 });
 
