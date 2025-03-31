@@ -11,5 +11,24 @@
             <h1>Dashboard</h1>
             <a href="/note" class="btn">Note</a>
         </div>
+        <h1>Notes Table</h1>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Important</th>
+                    <th>Created At</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% notes.forEach(note => { %>
+                <tr>
+                    <td><%= note.title %></td>
+                    <td><%= note.important %></td>
+                    <td><%= note.created_at %></td>
+                </tr>
+                <% }); %>
+            </tbody>
+        </table>
     </body>
 </html>

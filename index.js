@@ -44,11 +44,13 @@ app.post('/register', (req, res) => {
             }
             return res.send('Error while registering');
         }
+        req.session.user = user;
         res.redirect('/dashboard');
     });
 });
 
 app.get('/dashboard', (req, res) => {
+    console.log(req.session.user.username);
     if (!req.session.user){
         res.redirect('/login');
     }
@@ -56,9 +58,9 @@ app.get('/dashboard', (req, res) => {
         if (err) {
             return res.status(500).send('Database error');
         }
-        res.render('users', { users: rows });
+        console.log('rendered');
+        res.render('dashboard', { notes: rows });
     });
-    res.render('dashboard');
 });
 
 const PORT = 3000;
