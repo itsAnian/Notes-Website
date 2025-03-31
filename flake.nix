@@ -17,6 +17,7 @@
                 pkgs.nodejs
                 pkgs.nodePackages.npm
                 pkgs.ejs
+                pkgs.sqlite
                 ];
 
                 shellHook = ''
