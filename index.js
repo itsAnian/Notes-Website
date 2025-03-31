@@ -56,10 +56,10 @@ app.post('/register', (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
-    console.log(req.session.user.username);
     if (!req.session.user){
         res.redirect('/login');
     }
+
     db.all(`SELECT
         notes.title,
         notes.content,
@@ -69,14 +69,53 @@ app.get('/dashboard', (req, res) => {
         FROM notes
         FULL JOIN tags ON tags.note_id = notes.id
         WHERE notes.user_id = ?
-        GROUP BY notes.id`, [req.session.user.id], (err, rows) => {
-        if (err) {
-            return res.status(500).send('Database error');
-        }
-        rows.forEach(row =>{
-            console.log(row);
+        GROUP BY notes.id`, [req.session.user.id], (err, notes) => {
+            if (err) {
+                return res.status(500).send('Database error');
+            }
+
+            db.all(`
+        SELECT DISTINCT tags.tag
+        FROM tags
+        JOIN notes ON tags.note_id = notes.id
+        WHERE notes.user_id = ?;`, [req.session.user.id], (err, tags) => {
+            if (err) {
+                return res.status(500).send('Database error');
+            }
+            res.render('dashboard', { notes, tags });
         });
-        res.render('dashboard', { notes: rows });
+    });
+});
+
+app.get('/filter', (req, res) => {
+    const tag = req.query.tag;
+
+    db.all(`SELECT
+        notes.title,
+        notes.content,
+        notes.important,
+        notes.created_at,
+        GROUP_CONCAT(tags.tag, ', ') AS tags
+        FROM notes
+        FULL JOIN tags ON tags.note_id = notes.id
+        WHERE notes.user_id = ?
+        AND notes.id IN (
+        SELECT note_id FROM tags WHERE tag = ?
+        )
+        GROUP BY notes.id`, [req.session.user.id, tag], (err, notes) => {
+            if (err) {
+                return res.status(500).send('Database error');
+            }
+        db.all(`
+        SELECT DISTINCT tags.tag
+        FROM tags
+        JOIN notes ON tags.note_id = notes.id
+        WHERE notes.user_id = ?;`, [req.session.user.id], (err, tags) => {
+            if (err) {
+                return res.status(500).send('Database error');
+            }
+            res.render('dashboard', { notes, tags });
+        });
     });
 });
 

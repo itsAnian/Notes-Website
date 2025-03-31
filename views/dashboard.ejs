@@ -11,7 +11,15 @@
             <h1>Dashboard</h1>
             <a href="/note" class="button">Add Note</a>
         </div>
-        <h1>Notes Table</h1>
+        <h2>Filter</h1>
+        <br>
+        <div class="container">
+            <% tags.forEach(tag => { %>
+            <a href ="/filter?tag=<%= encodeURIComponent(tag.tag) %>" class = "button"><%= tag.tag %></a>
+            <% }); %>
+        </div>
+        <br>
+        <h2>Notes Table</h1>
         <table border="1">
             <thead>
                 <tr>
