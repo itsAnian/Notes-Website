@@ -35,3 +35,19 @@ Ref notes_users: notes.user_id > users.id
 - Provide a Delete Note button (at Dashboard Site and Edit Note Site)
 
 ![](./images/Website_Design_first_plan.png)
+
+### Requriements:
+[ ] Technology decision
+- Implementation:   
+[x] Creation of new Notes (title, content, tags(1-5), automatic creationdate, toggle for important)
+[ ] Dashboard (List of all notes, highlight important, Show Tags, Sort for creation Date)
+[ ] Edit and Delete Notes
+[x] Filter for tags
+- Technical Requirements
+[x] Usage of Express and a template engine
+[ ] Basic routing structur
+[x] database connection for user, notes, tags
+- Documentation
+[ ] Installation guide
+[ ] List of used technologies
+[ ] Screenshots of the most important features
