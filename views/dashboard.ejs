@@ -9,7 +9,7 @@
     <body>
         <div class="container">
             <h1>Dashboard</h1>
-            <a href="/note" class="button">Add Note</a>
+            <a href="/addnote" class="button">Add Note</a>
         </div>
         <h2>Filter</h1>
         <br>
@@ -25,14 +25,18 @@
             <thead>
                 <tr>
                     <th>Title</th>
-                    <th>Created At</th>
+                    <th class="sortable" data-order="asc" style="cursor:pointer;">Created At</th>
                     <th>Tags</th>
                 </tr>
             </thead>
             <tbody>
                 <% notes.forEach(note => { %>
-                    <tr>
-                    <td style="color: <%= note.important ? 'red' : 'white' %>;"><%= note.title %></td>
+                <tr>
+                    <td style="color: <%= note.important ? 'red' : 'white' %>;">
+                        <a href="/editnote?id=<%= encodeURIComponent(note.id) %>" style="color: inherit; text-decoration: none;">
+                            <%= note.title %>
+                        </a>
+                    </td>
                     <td><%= note.created_at %></td>
                     <td><%= note.tags %></td>
                 </tr>
@@ -41,3 +45,25 @@
         </table>
     </body>
 </html>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const table = document.querySelector("table tbody");
+    const rows = Array.from(table.querySelectorAll("tr"));
+    const header = document.querySelector("th.sortable");
+
+    header.addEventListener("click", function () {
+        const ascending = header.dataset.order === "asc";
+        header.dataset.order = ascending ? "desc" : "asc";
+
+        rows.sort((rowA, rowB) => {
+            const dateA = new Date(rowA.cells[1].textContent);
+            const dateB = new Date(rowB.cells[1].textContent);
+
+            return ascending ? dateA - dateB : dateB - dateA;
+        });
+
+        rows.forEach(row => table.appendChild(row));
+    });
+});
+</script>
