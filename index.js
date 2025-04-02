@@ -124,7 +124,7 @@ app.get('/addnote', (req, res) => {
     if (!req.session.user){
         res.redirect('/login');
     }
-   res.render('addnote');
+    res.render('addnote');
 });
 
 app.get('/editnote', (req, res) => {
@@ -144,6 +144,17 @@ app.get('/editnote', (req, res) => {
             res.render('editnote', { note, tags });
         });
     });
+});
+
+app.get('/deletenote', (req, res) => {
+    const note_id = req.query.id;
+    if (!req.session.user){
+        res.redirect('/login');
+    }
+
+    db.run(`DELETE FROM notes WHERE id IS ?`, [note_id]);
+
+    res.redirect('/dashboard');
 });
 
 app.post('/savenote', (req, res) => {
@@ -167,7 +178,7 @@ app.post('/savenote', (req, res) => {
                 }
 
                 if (tags) {
-                    db.run(`DELETE FROM tags WHERE note_id IS id`, [id]);
+                    db.run(`DELETE FROM tags WHERE note_id IS ?`, [id]);
                     const tagList = tags.split(',').map(tag => tag.trim()).slice(0, 5);
                     tagList.forEach(tag => {
                         db.run(`INSERT INTO tags (note_id, tag) VALUES (?, ?)`, [id, tag]);

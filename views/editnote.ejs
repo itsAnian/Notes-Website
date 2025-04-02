@@ -28,7 +28,8 @@
                 <br>
                 <button type="submit">Save</button>
             </form>
-            <a href="/dashboard" class="btn">Back to dashboard</a>
+            <a href="/deletenote?id=<%= encodeURIComponent(note.id) %>" class="button">DELETE</a>
+            <a href="/dashboard" class="button">Back to dashboard</a>
         </div>
     </body>
 </html>
