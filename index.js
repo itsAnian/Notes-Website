@@ -49,8 +49,12 @@ app.post('/register', (req, res) => {
             }
             return res.send('Error while registering');
         }
-        req.session.user = user;
-        res.redirect('/dashboard');
+        db.get('SELECT * FROM users WHERE username = ? AND password = ?', [register_username, register_password], (err, user) => {
+            if (err) return res.send('Error while login');
+            if (!user) return res.send('Invalid credentials');
+            req.session.user = user;
+            res.redirect('/dashboard');
+        });
     });
 });
 
