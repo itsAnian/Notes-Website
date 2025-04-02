@@ -6,8 +6,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(session({
-  secret: 'secret',
+app.use(session({ secret: 'secret',
   resave: false,
   saveUninitialized: true,
   cookie: { secure: false }})
@@ -61,6 +60,7 @@ app.get('/dashboard', (req, res) => {
     }
 
     db.all(`SELECT
+        notes.id,
         notes.title,
         notes.content,
         notes.important,
@@ -91,6 +91,7 @@ app.get('/filter', (req, res) => {
     const tag = req.query.tag;
 
     db.all(`SELECT
+        notes.id,
         notes.title,
         notes.content,
         notes.important,
@@ -119,11 +120,30 @@ app.get('/filter', (req, res) => {
     });
 });
 
-app.get('/note', (req, res) => {
+app.get('/addnote', (req, res) => {
     if (!req.session.user){
         res.redirect('/login');
     }
-   res.render('note');
+   res.render('addnote');
+});
+
+app.get('/editnote', (req, res) => {
+    const note_id = req.query.id;
+    if (!req.session.user){
+        res.redirect('/login');
+    }
+    db.get(`SELECT * FROM notes WHERE id = ? AND user_id = ?`, [note_id, req.session.user.id], (err, note) => {
+        if (err || !note) {
+            return res.status(404).send('note not found');
+        }
+        db.all(`SELECT tag FROM tags WHERE note_id = ?`, [note_id], (err, tags) => {
+            if (err || !tags) {
+                return res.status(404).send('tag(s) not found');
+            }
+
+            res.render('editnote', { note, tags });
+        });
+    });
 });
 
 app.post('/savenote', (req, res) => {
@@ -131,29 +151,47 @@ app.post('/savenote', (req, res) => {
         res.redirect('/login');
     }
 
-    const { title, content, tags, important } = req.body;
+    const { id, title, content, tags, important } = req.body;
     if(important == 'on'){
         boolImportant = true;
     }else{
         boolImportant = false;
     }
 
-    db.run('INSERT INTO notes (user_id, title, content, important) VALUES (?, ?, ?, ?)',
-        [req.session.user.id, title, content, boolImportant],
-        function (err) {
-            if (err) {
-                return console.error(err.message);
-            }
+    if (id){
+        db.run('UPDATE notes SET title = ?, content = ?, important = ? WHERE id IS ?',
+            [title, content, boolImportant, id],
+            function (err) {
+                if (err) {
+                    return console.error(err.message);
+                }
 
-            const note_id = this.lastID;
+                if (tags) {
+                    db.run(`DELETE FROM tags WHERE note_id IS id`, [id]);
+                    const tagList = tags.split(',').map(tag => tag.trim()).slice(0, 5);
+                    tagList.forEach(tag => {
+                        db.run(`INSERT INTO tags (note_id, tag) VALUES (?, ?)`, [id, tag]);
+                    });
+                }
+            });
+    }else{
+        db.run('INSERT INTO notes (user_id, title, content, important) VALUES (?, ?, ?, ?)',
+            [req.session.user.id, title, content, boolImportant],
+            function (err) {
+                if (err) {
+                    return console.error(err.message);
+                }
 
-            if (tags) {
-                const tagList = tags.split(',').map(tag => tag.trim()).slice(0, 5);
-                tagList.forEach(tag => {
-                    db.run(`INSERT INTO tags (note_id, tag) VALUES (?, ?)`, [note_id, tag]);
-                });
-            }
-        });
+                const note_id = this.lastID;
+
+                if (tags) {
+                    const tagList = tags.split(',').map(tag => tag.trim()).slice(0, 5);
+                    tagList.forEach(tag => {
+                        db.run(`INSERT INTO tags (note_id, tag) VALUES (?, ?)`, [note_id, tag]);
+                    });
+                }
+            });
+    }
     res.redirect('/dashboard');
 });
 
