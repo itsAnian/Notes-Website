@@ -21,17 +21,11 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    return redirect(req, res);
+    return res.redirect('/login');
 });
 
 function hashPassword(password){
   return crypto.createHash('sha256').update(password).digest('hex');
-}
-
-function redirect(req, res){
-    if (!req.session.user){
-        return res.redirect('/login');
-    }
 }
 
 app.post('/login', (req, res) => {
@@ -78,7 +72,9 @@ app.post('/register', (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
-    return redirect(req, res);
+    if (!req.session.user){
+        return res.redirect('/login');
+    }
 
     db.all(`SELECT
         notes.id,
@@ -109,6 +105,10 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/filter', (req, res) => {
+    if (!req.session.user){
+        return res.redirect('/login');
+    }
+
     const tag = req.query.tag;
 
     db.all(`SELECT
@@ -142,13 +142,18 @@ app.get('/filter', (req, res) => {
 });
 
 app.get('/addnote', (req, res) => {
-    return redirect(req, res);
+    if (!req.session.user){
+        return res.redirect('/login');
+    }
     res.render('addnote');
 });
 
 app.get('/editnote', (req, res) => {
+    if (!req.session.user){
+        return res.redirect('/login');
+    }
     const note_id = req.query.id;
-    return redirect(req, res);
+
     db.get(`SELECT * FROM notes WHERE id = ? AND user_id = ?`, [note_id, req.session.user.id], (err, note) => {
         if (err || !note) {
             return res.status(404).send('note not found');
@@ -164,8 +169,11 @@ app.get('/editnote', (req, res) => {
 });
 
 app.get('/deletenote', (req, res) => {
+    if (!req.session.user){
+        return res.redirect('/login');
+    }
+
     const note_id = req.query.id;
-    return redirect(req, res);
 
     db.run(`DELETE FROM notes WHERE id IS ?`, [note_id]);
 
@@ -173,7 +181,9 @@ app.get('/deletenote', (req, res) => {
 });
 
 app.post('/savenote', (req, res) => {
-    return redirect(req, res);
+    if (!req.session.user){
+        return res.redirect('/login');
+    }
 
     const { id, title, content, tags, important } = req.body;
     if(important == 'on'){
