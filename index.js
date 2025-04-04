@@ -21,13 +21,17 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    if (!req.session.user){
-        res.render('login', { login_error: null, register_error: null });
-    }
+    return redirect(req, res);
 });
 
 function hashPassword(password){
   return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+function redirect(req, res){
+    if (!req.session.user){
+        return res.redirect('/login');
+    }
 }
 
 app.post('/login', (req, res) => {
@@ -74,9 +78,7 @@ app.post('/register', (req, res) => {
 });
 
 app.get('/dashboard', (req, res) => {
-    if (!req.session.user){
-        res.redirect('/login');
-    }
+    return redirect(req, res);
 
     db.all(`SELECT
         notes.id,
@@ -140,17 +142,13 @@ app.get('/filter', (req, res) => {
 });
 
 app.get('/addnote', (req, res) => {
-    if (!req.session.user){
-        res.redirect('/login');
-    }
+    return redirect(req, res);
     res.render('addnote');
 });
 
 app.get('/editnote', (req, res) => {
     const note_id = req.query.id;
-    if (!req.session.user){
-        res.redirect('/login');
-    }
+    return redirect(req, res);
     db.get(`SELECT * FROM notes WHERE id = ? AND user_id = ?`, [note_id, req.session.user.id], (err, note) => {
         if (err || !note) {
             return res.status(404).send('note not found');
@@ -167,9 +165,7 @@ app.get('/editnote', (req, res) => {
 
 app.get('/deletenote', (req, res) => {
     const note_id = req.query.id;
-    if (!req.session.user){
-        res.redirect('/login');
-    }
+    return redirect(req, res);
 
     db.run(`DELETE FROM notes WHERE id IS ?`, [note_id]);
 
@@ -177,9 +173,7 @@ app.get('/deletenote', (req, res) => {
 });
 
 app.post('/savenote', (req, res) => {
-    if (!req.session.user){
-        res.redirect('/login');
-    }
+    return redirect(req, res);
 
     const { id, title, content, tags, important } = req.body;
     if(important == 'on'){
