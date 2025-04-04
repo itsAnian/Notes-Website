@@ -15,6 +15,9 @@
                 <label for="password">Password:</label>
                 <input type="password" id="login_password" name="login_password" required>
                 <button type="submit">Login</button>
+                <% if (login_error) { %>
+                <p style="color:red;"><%= login_error %></p>
+                <% } %>
             </form>
 
             <h1>Register</h1>
@@ -26,6 +29,9 @@
                 <label for="repeat_password">Repeat Password:</label>
                 <input type="password" id="register_repeat_password" name="register_repeat_password" required>
                 <button type="submit">Register</button>
+                <% if (register_error) { %>
+                <p style="color:red;"><%= register_error %></p>
+                <% } %>
             </form>
         </div>
     </body>
