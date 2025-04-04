@@ -4,6 +4,7 @@ const path = require('path');
 const db = require('./db/database.js');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const crypto = require('crypto');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({ secret: 'secret',
@@ -25,9 +26,14 @@ app.get('/', (req, res) => {
     }
 });
 
+function hashPassword(password){
+  return crypto.createHash('sha256').update(password).digest('hex');
+}
+
 app.post('/login', (req, res) => {
     const { login_username, login_password } = req.body;
-    db.get('SELECT * FROM users WHERE username = ? AND password = ?', [login_username, login_password], (err, user) => {
+    hashedPassword = hashPassword(login_password);
+    db.get('SELECT * FROM users WHERE username = ? AND password = ?', [login_username, hashedPassword], (err, user) => {
         if (err) return res.send('Error while login');
         if (!user) return res.send('Invalid credentials');
         req.session.user = user;
@@ -41,15 +47,16 @@ app.post('/register', (req, res) => {
     if (register_password != register_repeat_password) {
         return res.send('Passwords do not match' + register_password + register_repeat_password);
     }
+    hashedPassword = hashPassword(register_password);
 
-    db.run('INSERT INTO users (username, password) VALUES (?, ?)', [register_username, register_password], function(err) {
+    db.run('INSERT INTO users (username, password) VALUES (?, ?)', [register_username, hashedPassword], function(err) {
         if (err) {
             if (err.message.includes('UNIQUE')) {
                 return res.send('Username exists already');
             }
             return res.send('Error while registering');
         }
-        db.get('SELECT * FROM users WHERE username = ? AND password = ?', [register_username, register_password], (err, user) => {
+        db.get('SELECT * FROM users WHERE username = ? AND password = ?', [register_username, hashedPassword], (err, user) => {
             if (err) return res.send('Error while login');
             if (!user) return res.send('Invalid credentials');
             req.session.user = user;
