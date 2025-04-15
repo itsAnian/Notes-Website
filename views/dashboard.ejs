@@ -16,7 +16,7 @@
         <div class="container">
             <a href="/dashboard" class="button">Clear Filter</a>
             <% tags.forEach(tag => { %>
-            <a href ="/filter?tag=<%= encodeURIComponent(tag.tag) %>" class = "button"><%= tag.tag %></a>
+            <a href ="/dashboard/filter?tag=<%= encodeURIComponent(tag.tag) %>" class = "button"><%= tag.tag %></a>
             <% }); %>
         </div>
         <br>
