@@ -45,7 +45,7 @@ Ref notes_users: notes.user_id > users.id
 [x] Filter for tags
 - Technical Requirements
 [x] Usage of Express and a template engine
-[ ] Basic routing structur
+[x] Basic routing structur
 [x] database connection for user, notes, tags
 - Documentation
 [ ] Installation guide

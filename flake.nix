@@ -30,23 +30,25 @@
                 '';
                 };
 
-                packages.default = pkgs.stdenv.mkDerivation {
-                    name = "my-nodejs-project";
+                packages.default = pkgs.buildNpmPackage {
+                    pname = "notes-nodejs";
+                    version = "1.0.0";
                     src = ./.;
-                    buildInputs = [ pkgs.nodejs pkgs.ejs ];
-                    buildPhase = ''
-                        npm install express
-                        npm install sqlite3
-                        npm install express-session
-                        '';
-                    installPhase = ''
-                        npm start
+
+                    npmDepsHash = "sha256-9nRBTGCP6WzjJWlxwUebXFOkDw3kJQt+tQguTVNzz1Q=" ;
+
+                        installPhase = ''
+                        mkdir -p $out/bin
+                        cp -r ./* $out/app
+                        echo '#!/bin/sh' > $out/bin/notes-nodejs
+                        echo 'node $out/app/index.js' >> $out/bin/notes-nodejs
+                        chmod +x $out/bin/notes-nodejs
                         '';
                 };
 
                 apps.default = {
                     type = "app";
-                    program = "npm start";
+                    program = "${self.packages.${system}.default}/bin/notes-nodejs";
                 };
                 });
 }
